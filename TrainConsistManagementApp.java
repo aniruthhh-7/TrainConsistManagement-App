@@ -1,6 +1,5 @@
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
         System.out.println(" ======================================= ");
@@ -17,6 +16,6 @@ public class TrainConsistManagementApp {
         System.out.println(formation);
         System.out.println("\nNote:");
         System.out.println("LinkedHashSet preserves insertion order and removes duplicates automatically.");
-        System.out.println("\nUC5 formation setup completed ...");
+        System.out.println("\nUC5 formation setup completed...");
     }
 }
