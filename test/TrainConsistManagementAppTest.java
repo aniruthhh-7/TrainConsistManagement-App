@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TrainConsistManagementAppTest {
+class TrainSeatAggregationTest {
 
     static class Bogie {
         String name;
@@ -16,85 +16,94 @@ class TrainConsistManagementAppTest {
     }
 
     @Test
-    void testStreamGroupingBehavior() {
+    void testStreamAggregationBehavior() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24),
+                new Bogie("Sleeper", 70)
+        );
+
+        int totalCapacity = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(222, totalCapacity);
+    }
+
+    @Test
+    void testCapacityExtractionUsingMap() {
+        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72));
+        List<Integer> capacities = bogies.stream()
+                .map(b -> b.capacity)
+                .collect(Collectors.toList());
+
+        assertEquals(Collections.singletonList(72), capacities);
+    }
+
+    @Test
+    void testTotalSeatCalculation() {
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("AC Chair", 56),
+                new Bogie("Sleeper", 70)
+        );
+
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(126, total);
+    }
+
+    @Test
+    void testMultipleBogieAggregation() {
         List<Bogie> bogies = Arrays.asList(
                 new Bogie("Sleeper", 72),
                 new Bogie("Sleeper", 70),
-                new Bogie("AC Chair", 56),
-                new Bogie("AC Chair", 60),
-                new Bogie("First Class", 24)
+                new Bogie("AC Chair", 56)
         );
 
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
-        assertEquals(3, grouped.size());
-        assertEquals(2, grouped.get("Sleeper").size());
-        assertEquals(2, grouped.get("AC Chair").size());
-        assertEquals(1, grouped.get("First Class").size());
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
+
+        assertEquals(198, total);
     }
 
     @Test
-    void testCategoryClassification() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("Sleeper", 70)
-        );
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+    void testSingleBogieHandling() {
+        List<Bogie> bogies = Arrays.asList(new Bogie("First Class", 24));
 
-        assertTrue(grouped.containsKey("Sleeper"));
-        assertEquals(2, grouped.get("Sleeper").size());
-    }
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
-    @Test
-    void testMultipleBogiesInSameGroup() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("AC Chair", 56),
-                new Bogie("AC Chair", 60)
-        );
-
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
-
-        assertEquals(1, grouped.size());
-        assertEquals(2, grouped.get("AC Chair").size());
-    }
-
-    @Test
-    void testDifferentBogieCategories() {
-        List<Bogie> bogies = Arrays.asList(
-                new Bogie("Sleeper", 72),
-                new Bogie("First Class", 24)
-        );
-
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
-
-        assertTrue(grouped.containsKey("Sleeper"));
-        assertTrue(grouped.containsKey("First Class"));
-        assertEquals(1, grouped.get("Sleeper").size());
-        assertEquals(1, grouped.get("First Class").size());
+        assertEquals(24, total);
     }
 
     @Test
     void testEmptyCollectionHandling() {
         List<Bogie> bogies = new ArrayList<>();
 
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        int total = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
-        assertTrue(grouped.isEmpty());
+        assertEquals(0, total);
     }
 
     @Test
     void testOriginalCollectionIntegrity() {
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("AC Chair", 56));
+        List<Bogie> bogies = Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56)
+        );
 
         List<Bogie> copy = new ArrayList<>(bogies);
 
-        bogies.stream().collect(Collectors.groupingBy(b -> b.name));
+        bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
         assertEquals(copy.size(), bogies.size());
         assertEquals(copy.get(0).name, bogies.get(0).name);
@@ -102,17 +111,19 @@ class TrainConsistManagementAppTest {
     }
 
     @Test
-    void testMapStructureValidation() {
+    void testNumericAggregationValidation() {
         List<Bogie> bogies = Arrays.asList(
                 new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56)
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24),
+                new Bogie("Sleeper", 70)
         );
 
-        Map<String, List<Bogie>> grouped = bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+        int expectedSum = 72 + 56 + 24 + 70;
+        int actualSum = bogies.stream()
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
 
-        assertTrue(grouped instanceof Map);
-        assertTrue(grouped.get("Sleeper") instanceof List);
-        assertEquals("Sleeper", grouped.get("Sleeper").get(0).name);
+        assertEquals(expectedSum, actualSum);
     }
 }
