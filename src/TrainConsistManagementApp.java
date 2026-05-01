@@ -1,56 +1,56 @@
-import java.util.*;
-import java.util.stream.*;
+import java.util.Scanner;
 
 public class TrainConsistManagementApp {
 
-    // Bogie model
-    static class Bogie {
-        String type;
-        int capacity;
-
-        Bogie(String type, int capacity) {
-            this.type = type;
-            this.capacity = capacity;
+    // ---- CUSTOM EXCEPTION ----
+    static class InvalidCapacityException extends Exception {
+        public InvalidCapacityException(String message) {
+            super(message);
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("==================================");
-        System.out.println(" UC13 - Performance Comparison (Loops vs Streams) ");
-        System.out.println("==================================");
+    // ---- PASSENGER BOGIE MODEL WITH VALIDATION ----
+    static class PassengerBogie {
+        private String bogieType;
+        private int seatCapacity;
 
-        // Create large test dataset
-        List<Bogie> bogies = new ArrayList<>();
-        for (int i = 0; i < 100000; i++) {
-            bogies.add(new Bogie("Sleeper", 72));
-            bogies.add(new Bogie("AC Chair", 56));
-            bogies.add(new Bogie("First Class", 24));
-            bogies.add(new Bogie("Sleeper", 70));
-        }
-
-        // ---- LOOP-BASED FILTERING ----
-        long loopStart = System.nanoTime();
-        List<Bogie> loopFiltered = new ArrayList<>();
-        for (Bogie b : bogies) {
-            if (b.capacity > 50) {
-                loopFiltered.add(b);
+        public PassengerBogie(String bogieType, int seatCapacity) throws InvalidCapacityException {
+            if (seatCapacity <= 0) {
+                throw new InvalidCapacityException("Capacity must be greater than zero");
             }
+            this.bogieType = bogieType;
+            this.seatCapacity = seatCapacity;
         }
-        long loopEnd = System.nanoTime();
-        long loopDuration = loopEnd - loopStart;
 
-        // ---- STREAM-BASED FILTERING ----
-        long streamStart = System.nanoTime();
-        List<Bogie> streamFiltered = bogies.stream()
-                .filter(b -> b.capacity > 50)
-                .collect(Collectors.toList());
-        long streamEnd = System.nanoTime();
-        long streamDuration = streamEnd - streamStart;
+        public void displayDetails() {
+            System.out.println("Created Bogie: " + bogieType + " -> " + seatCapacity);
+        }
+    }
 
-        // Display results
-        System.out.println("\nLoop Execution Time (ns): " + loopDuration);
-        System.out.println("Stream Execution Time (ns): " + streamDuration);
+    // ---- MAIN METHOD ----
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("UC14 - Handle Invalid Bogie Capacity");
+        System.out.println("------------------------------------");
 
-        System.out.println("\nUC13 performance benchmarking completed ...");
+        try {
+            System.out.print("Enter Passenger Bogie Type (Sleeper / AC Chair / First Class): ");
+            String type = scanner.nextLine();
+
+            System.out.print("Enter Seat Capacity: ");
+            int capacity = scanner.nextInt();
+
+            PassengerBogie bogie = new PassengerBogie(type, capacity);
+            bogie.displayDetails();
+
+        } catch (InvalidCapacityException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        } finally {
+            System.out.println("\nUC14 exception handling completed ...");
+        }
+
+        scanner.close();
     }
 }
